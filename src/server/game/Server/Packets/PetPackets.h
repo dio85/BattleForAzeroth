@@ -140,6 +140,16 @@ namespace WorldPackets
             std::vector<PetStableInfo> Pets;
         };
 
+        class PetStableResult final : public ServerPacket
+        {
+        public:
+            PetStableResult() : ServerPacket(SMSG_PET_STABLE_RESULT, 1) {}
+
+            WorldPacket const* Write() override;
+
+            uint8 Result = 0;
+        };
+
         class PetLearnedSpells final : public ServerPacket
         {
         public:

@@ -53,6 +53,10 @@ struct DeclinedName;
 struct ItemTemplate;
 struct MovementInfo;
 struct Position;
+enum class AuctionCommand : int8;
+enum class AuctionResult : int8;
+enum InventoryResult : uint8;
+enum class StableResult : uint8;
 
 namespace lfg
 {
@@ -919,6 +923,13 @@ enum DeclinedNameResult
     DECLINED_NAMES_RESULT_ERROR   = 1
 };
 
+enum TutorialsFlag : uint8
+{
+    TUTORIALS_FLAG_NONE              = 0x00,
+    TUTORIALS_FLAG_CHANGED           = 0x01,
+    TUTORIALS_FLAG_LOADED_FROM_DB    = 0x02
+};
+
 //class to deal with packet processing
 //allows to determine if next packet is safe to be processed
 class PacketFilter
@@ -1082,7 +1093,8 @@ class TC_GAME_API WorldSession
         // Pet
         void SendQueryPetNameResponse(ObjectGuid guid);
         void SendStablePet(ObjectGuid guid);
-        void SendPetStableResult(uint8 result);
+        void SendStablePetCallback(ObjectGuid guid, PreparedQueryResult result);
+        void SendPetStableResult(StableResult result);
         bool CheckStableMaster(ObjectGuid guid);
         void UpdatePetSlot(uint32 petNumber, uint8 oldPetSlot, uint8 newPetSlot);
         void SendPetSlotUpdated(int32 petNumberA, int32 petSlotA, int32 petNumberB, int32 petSlotB);
@@ -1432,7 +1444,14 @@ class TC_GAME_API WorldSession
         void HandleBinderActivateOpcode(WorldPackets::NPC::Hello& packet);
         void HandleRequestStabledPets(WorldPackets::NPC::RequestStabledPets& packet);
         void HandleSetPetSlot(WorldPackets::NPC::SetPetSlot& packet);
+        void HandleStablePetCallback(PreparedQueryResult result);
+        void HandleUnstablePet(WorldPacket& recvData);
+        void HandleUnstablePetCallback(uint32 petId, PreparedQueryResult result);
         void HandleStableRevivePet(WorldPacket& recvPacket);
+
+        void HandleStableSwapPet(WorldPacket& recvData);
+
+        void HandleStableSwapPetCallback(uint32 petId, PreparedQueryResult result);
 
         void HandleCanDuel(WorldPackets::Duel::CanDuel& packet);
         void HandleDuelResponseOpcode(WorldPackets::Duel::DuelResponse& duelResponse);

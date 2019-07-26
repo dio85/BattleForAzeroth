@@ -432,7 +432,7 @@ uint32 Manager::FinalizePurchase(WorldSession * session, Purchase * purchase)
             ChatHandler(session).PSendSysMessage(LANG_YOUR_CHAT_ENABLED);
 
             // must also update database
-            PreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
+            LoginDatabasePreparedStatement* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_MUTE_TIME);
             stmt->setInt64(0, 0);
             stmt->setString(1, "");
             stmt->setString(2, "");

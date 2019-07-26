@@ -210,3 +210,10 @@ WorldPacket const* WorldPackets::Pet::PetAdded::Write()
 
     return &_worldPacket;
 }
+
+WorldPacket const* WorldPackets::Pet::PetStableResult::Write()
+{
+    _worldPacket << Result;
+
+    return &_worldPacket;
+}
