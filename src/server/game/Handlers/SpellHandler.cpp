@@ -218,6 +218,45 @@ void WorldSession::HandleOpenItemOpcode(WorldPackets::Spells::OpenItem& packet)
         player->SendLoot(item->GetGUID(), LOOT_CORPSE);
 }
 
+void WorldSession::HandleOpenWrappedItemCallback(uint16 pos, ObjectGuid itemGuid, PreparedQueryResult result)
+{
+    if (!GetPlayer())
+        return;
+
+    Item* item = GetPlayer()->GetItemByPos(pos);
+    if (!item)
+        return;
+
+    if (item->GetGUID() != itemGuid || !item->HasItemFlag(ITEM_FIELD_FLAG_WRAPPED)) // during getting result, gift was swapped with another item
+        return;
+
+    if (!result)
+    {
+        TC_LOG_ERROR("network", "Wrapped item %s don't have record in character_gifts table and will deleted", item->GetGUID().ToString().c_str());
+        GetPlayer()->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
+        return;
+    }
+
+    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+
+    Field* fields = result->Fetch();
+    uint32 entry = fields[0].GetUInt32();
+    uint32 flags = fields[1].GetUInt32();
+
+    item->SetGiftCreator(ObjectGuid::Empty);
+    item->SetEntry(entry);
+    item->SetItemFlags(ItemFieldFlags(flags));
+    item->SetState(ITEM_CHANGED, GetPlayer());
+
+    GetPlayer()->SaveInventoryAndGoldToDB(trans);
+
+    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_GIFT);
+    stmt->setUInt64(0, itemGuid.GetCounter());
+    trans->Append(stmt);
+
+    CharacterDatabase.CommitTransaction(trans);
+}
+
 void WorldSession::HandleGameObjectUseOpcode(WorldPackets::GameObject::GameObjUse& packet)
 {
     if (GameObject* obj = GetPlayer()->GetGameObjectIfCanInteractWith(packet.Guid))

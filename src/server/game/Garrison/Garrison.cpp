@@ -237,7 +237,7 @@ bool Garrison::LoadFromDB()
     return true;
 }
 
-void Garrison::SaveToDB(SQLTransaction& trans)
+void Garrison::SaveToDB(CharacterDatabaseTransaction trans)
 {
     DeleteFromDB(trans);
 
@@ -312,12 +312,7 @@ void Garrison::SaveToDB(SQLTransaction& trans)
     }
 }
 
-void Garrison::DeleteFromDB(SQLTransaction& trans)
-{
-    DeleteFromDB(trans, _owner->GetGUID().GetCounter(), GetType());
-}
-
-void Garrison::DeleteFromDB(SQLTransaction& trans, ObjectGuid::LowType guid, GarrisonType garrType)
+void Garrison::DeleteFromDB(ObjectGuid::LowType ownerGuid, CharacterDatabaseTransaction trans)
 {
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHARACTER_GARRISON);
     trans->Append(stmt);
@@ -353,6 +348,15 @@ void Garrison::Leave()
 {
     _owner->SetCurrentGarrison(GARRISON_TYPE_NONE);
     AI()->OnPlayerLeave(_owner);
+
+    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+    DeleteFromDB(_owner->GetGUID().GetCounter(), trans);
+    CharacterDatabase.CommitTransaction(trans);
+
+    WorldPackets::Garrison::GarrisonDeleteResult garrisonDelete;
+    garrisonDelete.Result = GARRISON_SUCCESS;
+    garrisonDelete.GarrSiteID = _siteLevel->GarrSiteID;
+    _owner->SendDirectMessage(garrisonDelete.Write());
 }
 
 uint32 Garrison::GetScriptId() const

@@ -59,10 +59,10 @@ public:
     explicit Garrison(Player* owner);
     Player* GetOwner() const { return _owner; }
 
-    virtual bool LoadFromDB();
-    virtual void SaveToDB(SQLTransaction& trans);
-    void DeleteFromDB(SQLTransaction& trans);
-    static void DeleteFromDB(SQLTransaction& trans, ObjectGuid::LowType guid, GarrisonType garrType);
+    bool LoadFromDB(PreparedQueryResult garrison, PreparedQueryResult blueprints, PreparedQueryResult buildings,
+        PreparedQueryResult followers, PreparedQueryResult abilities);
+    void SaveToDB(CharacterDatabaseTransaction trans);
+    static void DeleteFromDB(ObjectGuid::LowType ownerGuid, CharacterDatabaseTransaction trans);
 
     virtual bool Create(uint32 garrSiteId);
     void Update(uint32 const diff);

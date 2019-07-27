@@ -64,7 +64,7 @@ class TC_GAME_API Pet : public Guardian
         bool CreateBaseAtCreature(Creature* creature);
         bool CreateBaseAtCreatureInfo(CreatureTemplate const* cinfo, Unit* owner);
         bool CreateBaseAtTamed(CreatureTemplate const* cinfo, Map* map);
-        bool LoadPetData(Player* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false);
+        bool LoadPetFromDB(Player* owner, uint32 petEntry, uint32 petnumber, bool current);
         bool IsLoading() const override { return m_loading;}
         void SavePetToDB(PetSaveMode mode);
         void Remove(PetSaveMode mode, bool returnreagent = false);
@@ -112,9 +112,9 @@ class TC_GAME_API Pet : public Guardian
 
         void _LoadSpellCooldowns();
         void _LoadAuras(uint32 timediff);
-        void _SaveAuras(SQLTransaction& trans);
+        void _SaveAuras(CharacterDatabaseTransaction& trans);
         void _LoadSpells();
-        void _SaveSpells(SQLTransaction& trans);
+        void _SaveSpells(CharacterDatabaseTransaction& trans);
 
         bool addSpell(uint32 spellId, ActiveStates active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, PetSpellType type = PETSPELL_NORMAL);
         bool learnSpell(uint32 spell_id);
